@@ -21,22 +21,11 @@ export interface TextLine {
   fontWeight: string;
   italic: boolean;
   color: string;
-  opacity: number;
-  letterSpacing: number;
-  textTransform: 'none' | 'uppercase' | 'lowercase';
 }
 
 export interface OverlaySettings {
   template: 'clean' | 'card' | 'glass';
   fontFamily: string;
-  alignment: 'left' | 'center' | 'right';
-  lineSpacing: number;
-  shadow: boolean;
-  outline: boolean;
-  backgroundColor: string;
-  backgroundOpacity: number;
-  borderWidth: number;
-  borderColor: string;
   x: number;
   y: number;
   lines: TextLine[];
@@ -55,14 +44,6 @@ function App() {
   const [overlay, setOverlay] = useState<OverlaySettings>({
     template: 'card',
     fontFamily: 'Inter',
-    alignment: 'center',
-    lineSpacing: 1.2,
-    shadow: true,
-    outline: false,
-    backgroundColor: '#ffffff',
-    backgroundOpacity: 0.98,
-    borderWidth: 0,
-    borderColor: '#e2e8f0',
     x: 50,
     y: 50,
     lines: [
@@ -73,9 +54,6 @@ function App() {
         fontWeight: '800', 
         italic: false,
         color: '#000000', 
-        opacity: 1,
-        letterSpacing: -0.5, 
-        textTransform: 'none' 
       },
       { 
         id: '2', 
@@ -83,10 +61,7 @@ function App() {
         fontSize: 18, 
         fontWeight: '500', 
         italic: false,
-        color: '#000000', 
-        opacity: 1,
-        letterSpacing: 1, 
-        textTransform: 'uppercase' 
+        color: '#64748b', 
       }
     ]
   });
@@ -302,21 +277,20 @@ function App() {
                   transform: 'translate(-50%, -50%)',
                   cursor: isDraggingText ? 'grabbing' : 'grab',
                   pointerEvents: 'auto',
-                  backgroundColor: overlay.backgroundColor === 'transparent' 
-                    ? 'transparent' 
-                    : `rgba(${parseInt(overlay.backgroundColor.slice(1, 3), 16)}, ${parseInt(overlay.backgroundColor.slice(3, 5), 16)}, ${parseInt(overlay.backgroundColor.slice(5, 7), 16)}, ${overlay.backgroundOpacity})`,
+                  backgroundColor: overlay.template === 'clean' ? 'transparent' : overlay.template === 'card' ? '#ffffff' : 'rgba(255, 255, 255, 0.3)',
                   backdropFilter: overlay.template === 'glass' ? 'blur(10px)' : 'none',
-                  boxShadow: overlay.shadow ? '0 10px 25px rgba(0, 0, 0, 0.1)' : 'none',
-                  border: overlay.borderWidth > 0 ? `${overlay.borderWidth}px solid ${overlay.borderColor}` : 'none',
-                  padding: overlay.backgroundColor === 'transparent' ? '0' : '1.5rem 3rem',
+                  boxShadow: overlay.template === 'clean' ? 'none' : '0 4px 15px rgba(0, 0, 0, 0.1)',
+                  border: overlay.template === 'card' ? '1px solid #e2e8f0' : overlay.template === 'glass' ? '1px solid rgba(255,255,255,0.4)' : 'none',
+                  padding: overlay.template === 'clean' ? '0' : '1.5rem 2rem',
                   display: 'flex',
                   flexDirection: 'column',
-                  alignItems: overlay.alignment === 'center' ? 'center' : overlay.alignment === 'right' ? 'flex-end' : 'flex-start',
-                  gap: `${(overlay.lineSpacing - 1) * 20}px`,
-                  textAlign: overlay.alignment,
-                  minWidth: overlay.backgroundColor === 'transparent' ? 'auto' : '320px',
+                  alignItems: 'center',
+                  gap: '4px',
+                  textAlign: 'center',
+                  minWidth: overlay.template === 'clean' ? 'auto' : '280px',
                   zIndex: 10,
-                  borderRadius: '2px',
+                  borderRadius: overlay.template === 'clean' ? '0' : '8px',
+                  fontFamily: overlay.fontFamily,
                 }}
                 onMouseDown={(e) => {
                   e.stopPropagation();
@@ -332,15 +306,7 @@ function App() {
                       fontWeight: line.fontWeight,
                       fontStyle: line.italic ? 'italic' : 'normal',
                       color: line.color,
-                      opacity: line.opacity,
-                      letterSpacing: `${line.letterSpacing}px`,
-                      textTransform: line.textTransform as any,
-                      textShadow: overlay.shadow 
-                        ? `2px 2px 4px ${line.color === '#ffffff' ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.3)'}` 
-                        : 'none',
-                      WebkitTextStroke: overlay.outline 
-                        ? `1.5px ${line.color === '#ffffff' || line.color.toLowerCase() === '#fff' ? '#000000' : '#ffffff'}` 
-                        : '0px transparent',
+                      lineHeight: '1.2',
                     }}
                   >
                     {line.text}
