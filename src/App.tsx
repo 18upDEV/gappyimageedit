@@ -235,43 +235,6 @@ function App() {
       <h1>Retail Compliance Report</h1>
       <p className="subtitle">Professional Merchandising & Store Inspection Documentation</p>
       
-      <div className="controls">
-        <input 
-          type="file" 
-          multiple 
-          accept=".jpeg,.jpg,.png" 
-          onChange={handleFileChange} 
-          id="file-input"
-        />
-        <label htmlFor="file-input" className="file-label">
-          <ImageIcon size={18} /> Add Photos ({images.length}/9)
-        </label>
-        
-        {images.length > 0 && (
-          <button onClick={clearAllImages} className="clear-all-button">
-            <Trash2 size={18} /> Clear All
-          </button>
-        )}
-
-        {error && <p className="error">{error}</p>}
-        
-        <button 
-          onClick={exportImage} 
-          disabled={images.length === 0}
-          className="export-button"
-        >
-          <Download size={18} /> Generate Report Image
-        </button>
-
-        <button 
-          onClick={() => setIsEditorOpen(true)} 
-          disabled={images.length === 0}
-          className="edit-text-trigger"
-        >
-          <Type size={18} /> Customize Text Overlay
-        </button>
-      </div>
-
       <div className="grid-wrapper">
         <div 
           className="grid-container" 
@@ -279,6 +242,9 @@ function App() {
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
+          style={{
+            aspectRatio: images.length <= 4 ? '1 / 1' : images.length <= 6 ? '3 / 2' : '1 / 1',
+          }}
         >
           {images.length > 0 ? (
             <>
@@ -376,11 +342,48 @@ function App() {
             </>
           ) : (
             <div className="placeholder">
-              <p>Select 1 or 4 images to see the preview</p>
+              <p>Select up to 9 images to see the preview</p>
               <span style={{fontSize: '0.8rem', marginTop: '0.5rem'}}>Professional Documentation Aesthetic</span>
             </div>
           )}
         </div>
+      </div>
+
+      <div className="controls">
+        <input 
+          type="file" 
+          multiple 
+          accept=".jpeg,.jpg,.png" 
+          onChange={handleFileChange} 
+          id="file-input"
+        />
+        <label htmlFor="file-input" className="file-label">
+          <ImageIcon size={18} /> Add Photos ({images.length}/9)
+        </label>
+        
+        {images.length > 0 && (
+          <button onClick={clearAllImages} className="clear-all-button">
+            <Trash2 size={18} /> Clear All
+          </button>
+        )}
+
+        {error && <p className="error">{error}</p>}
+        
+        <button 
+          onClick={exportImage} 
+          disabled={images.length === 0}
+          className="export-button"
+        >
+          <Download size={18} /> Generate Report Image
+        </button>
+
+        <button 
+          onClick={() => setIsEditorOpen(true)} 
+          disabled={images.length === 0}
+          className="edit-text-trigger"
+        >
+          <Type size={18} /> Customize Text Overlay
+        </button>
       </div>
 
       {/* Crop Modal */}

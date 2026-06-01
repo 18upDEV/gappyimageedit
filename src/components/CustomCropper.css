@@ -59,9 +59,9 @@
   bottom: 0;
   width: 1px;
   cursor: col-resize;
-  padding: 0 8px; /* Hit area */
+  padding: 0 22px; /* 44px hit area */
   background-clip: content-box;
-  margin-left: -8.5px;
+  margin-left: -22px;
 }
 
 .grid-line.horizontal {
@@ -69,9 +69,9 @@
   right: 0;
   height: 1px;
   cursor: row-resize;
-  padding: 8px 0; /* Hit area */
+  padding: 22px 0; /* 44px hit area */
   background-clip: content-box;
-  margin-top: -8.5px;
+  margin-top: -22px;
 }
 
 .grid-line:hover {
@@ -87,51 +87,72 @@
 .border-handle.top, .border-handle.bottom {
   left: 10px;
   right: 10px;
-  height: 16px;
+  height: 44px;
   cursor: ns-resize;
 }
-.border-handle.top { top: -8px; }
-.border-handle.bottom { bottom: -8px; }
+.border-handle.top { top: -22px; }
+.border-handle.bottom { bottom: -22px; }
 
 .border-handle.left, .border-handle.right {
   top: 10px;
   bottom: 10px;
-  width: 16px;
+  width: 44px;
   cursor: ew-resize;
 }
-.border-handle.left { left: -8px; }
-.border-handle.right { right: -8px; }
+.border-handle.left { left: -22px; }
+.border-handle.right { right: -22px; }
 
 .corner-handle {
   position: absolute;
+  width: 44px;
+  height: 44px;
+  background-color: transparent;
+  pointer-events: auto;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.corner-handle::after {
+  content: '';
   width: 24px;
   height: 24px;
   background-color: white;
   border: 2px solid #2563eb;
   border-radius: 4px;
-  pointer-events: auto;
-  z-index: 10;
 }
 
-.corner-handle.nw { top: -12px; left: -12px; cursor: nwse-resize; }
-.corner-handle.ne { top: -12px; right: -12px; cursor: nesw-resize; }
-.corner-handle.sw { bottom: -12px; left: -12px; cursor: nesw-resize; }
-.corner-handle.se { bottom: -12px; right: -12px; cursor: nwse-resize; }
+.corner-handle.nw { top: -22px; left: -22px; cursor: nwse-resize; }
+.corner-handle.ne { top: -22px; right: -22px; cursor: nesw-resize; }
+.corner-handle.sw { bottom: -22px; left: -22px; cursor: nesw-resize; }
+.corner-handle.se { bottom: -22px; right: -22px; cursor: nwse-resize; }
 
 .intersection-handle {
   position: absolute;
-  width: 12px;
-  height: 12px;
-  background-color: rgba(255, 255, 255, 0.8);
-  border: 1px solid #2563eb;
-  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  background-color: transparent;
   transform: translate(-50%, -50%);
   pointer-events: auto;
   cursor: move;
   z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.intersection-handle:hover {
+.intersection-handle::after {
+  content: '';
+  width: 16px;
+  height: 16px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 2px solid #2563eb;
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.intersection-handle:hover::after {
   background-color: #2563eb;
-  transform: translate(-50%, -50%) scale(1.3);
+  transform: scale(1.3);
 }
