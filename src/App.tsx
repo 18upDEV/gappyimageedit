@@ -28,6 +28,14 @@ export interface OverlaySettings {
   fontFamily: string;
   x: number;
   y: number;
+  boxWidth: number;
+  boxHeight: number;
+  padding: number;
+  borderRadius: number;
+  borderWidth: number;
+  borderColor: string;
+  backgroundColor: string;
+  backgroundOpacity: number;
   lines: TextLine[];
 }
 
@@ -46,6 +54,14 @@ function App() {
     fontFamily: 'Inter',
     x: 50,
     y: 50,
+    boxWidth: 280,
+    boxHeight: 0, // 0 means auto
+    padding: 24,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    backgroundColor: '#ffffff',
+    backgroundOpacity: 0.98,
     lines: [
       { 
         id: '1', 
@@ -277,19 +293,23 @@ function App() {
                   transform: 'translate(-50%, -50%)',
                   cursor: isDraggingText ? 'grabbing' : 'grab',
                   pointerEvents: 'auto',
-                  backgroundColor: overlay.template === 'clean' ? 'transparent' : overlay.template === 'card' ? '#ffffff' : 'rgba(255, 255, 255, 0.3)',
+                  backgroundColor: overlay.backgroundColor === 'transparent' || overlay.backgroundOpacity === 0
+                    ? 'transparent' 
+                    : `rgba(${parseInt(overlay.backgroundColor.slice(1, 3), 16) || 255}, ${parseInt(overlay.backgroundColor.slice(3, 5), 16) || 255}, ${parseInt(overlay.backgroundColor.slice(5, 7), 16) || 255}, ${overlay.backgroundOpacity})`,
                   backdropFilter: overlay.template === 'glass' ? 'blur(10px)' : 'none',
                   boxShadow: overlay.template === 'clean' ? 'none' : '0 4px 15px rgba(0, 0, 0, 0.1)',
-                  border: overlay.template === 'card' ? '1px solid #e2e8f0' : overlay.template === 'glass' ? '1px solid rgba(255,255,255,0.4)' : 'none',
-                  padding: overlay.template === 'clean' ? '0' : '1.5rem 2rem',
+                  border: overlay.borderWidth > 0 ? `${overlay.borderWidth}px solid ${overlay.borderColor}` : 'none',
+                  padding: `${overlay.padding}px`,
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   gap: '4px',
                   textAlign: 'center',
-                  minWidth: overlay.template === 'clean' ? 'auto' : '280px',
+                  minWidth: `${overlay.boxWidth}px`,
+                  minHeight: overlay.boxHeight > 0 ? `${overlay.boxHeight}px` : 'auto',
+                  justifyContent: 'center',
                   zIndex: 10,
-                  borderRadius: overlay.template === 'clean' ? '0' : '8px',
+                  borderRadius: `${overlay.borderRadius}px`,
                   fontFamily: overlay.fontFamily,
                 }}
                 onMouseDown={(e) => {
