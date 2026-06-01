@@ -35,6 +35,8 @@ export interface OverlaySettings {
   outline: boolean;
   backgroundColor: string;
   backgroundOpacity: number;
+  borderWidth: number;
+  borderColor: string;
   x: number;
   y: number;
   lines: TextLine[];
@@ -47,6 +49,7 @@ function App() {
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
   const [currentGrid, setCurrentGrid] = useState<GridData | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   
   // Advanced Overlay State
   const [overlay, setOverlay] = useState<OverlaySettings>({
@@ -58,6 +61,8 @@ function App() {
     outline: false,
     backgroundColor: '#ffffff',
     backgroundOpacity: 0.98,
+    borderWidth: 0,
+    borderColor: '#e2e8f0',
     x: 50,
     y: 50,
     lines: [
@@ -168,6 +173,7 @@ function App() {
 
   const saveCrop = async () => {
     if (activeCropIndex === null || !currentGrid) return;
+    setIsProcessing(true);
 
     const imageData = images[activeCropIndex];
     const pixelCrop = currentGrid.pixelCrop;
@@ -194,6 +200,8 @@ function App() {
       setCurrentGrid(null);
     } catch (e) {
       console.error(e);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -299,7 +307,7 @@ function App() {
                     : `rgba(${parseInt(overlay.backgroundColor.slice(1, 3), 16)}, ${parseInt(overlay.backgroundColor.slice(3, 5), 16)}, ${parseInt(overlay.backgroundColor.slice(5, 7), 16)}, ${overlay.backgroundOpacity})`,
                   backdropFilter: overlay.template === 'glass' ? 'blur(10px)' : 'none',
                   boxShadow: overlay.shadow ? '0 10px 25px rgba(0, 0, 0, 0.1)' : 'none',
-                  border: overlay.backgroundColor === 'transparent' ? 'none' : '1px solid #e2e8f0',
+                  border: overlay.borderWidth > 0 ? `${overlay.borderWidth}px solid ${overlay.borderColor}` : 'none',
                   padding: overlay.backgroundColor === 'transparent' ? '0' : '1.5rem 3rem',
                   display: 'flex',
                   flexDirection: 'column',
@@ -430,8 +438,10 @@ function App() {
                 </div>
               </div>
               <div className="modal-actions">
-                <button onClick={() => setActiveCropIndex(null)} className="cancel-btn">Cancel</button>
-                <button onClick={saveCrop} className="save-btn">Apply Crop</button>
+                <button onClick={() => setActiveCropIndex(null)} className="cancel-btn" disabled={isProcessing}>Cancel</button>
+                <button onClick={saveCrop} className="save-btn" disabled={isProcessing}>
+                  {isProcessing ? 'Processing...' : 'Apply Crop'}
+                </button>
               </div>
             </div>
           </div>

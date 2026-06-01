@@ -276,10 +276,10 @@ const TextEditorPanel: React.FC<TextEditorPanelProps> = ({
           )}
         </div>
 
-        {/* Background & Position */}
+        {/* Background & Border */}
         <div className={`editor-section ${activeSection === 'background' ? 'expanded' : ''}`}>
           <div className="section-header" onClick={() => toggleSection('background')}>
-            <h4>Background & Position</h4>
+            <h4>Background & Border</h4>
             {activeSection === 'background' ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
           </div>
           {activeSection === 'background' && (
@@ -302,6 +302,29 @@ const TextEditorPanel: React.FC<TextEditorPanelProps> = ({
                     step="0.1" 
                     value={settings.backgroundOpacity}
                     onChange={(e) => onChange({ ...settings, backgroundOpacity: Number(e.target.value) })}
+                  />
+                </div>
+              </div>
+              <div className="settings-grid" style={{ marginTop: '1.25rem' }}>
+                <div className="control-item">
+                  <label>Border Width</label>
+                  <select 
+                      value={settings.borderWidth || 0}
+                      onChange={(e) => onChange({ ...settings, borderWidth: Number(e.target.value) })}
+                    >
+                      <option value="0">0px (None)</option>
+                      <option value="1">1px</option>
+                      <option value="2">2px</option>
+                      <option value="3">3px</option>
+                      <option value="5">5px</option>
+                  </select>
+                </div>
+                <div className="control-item">
+                  <label>Border Color</label>
+                  <input 
+                    type="color" 
+                    value={settings.borderColor || '#e2e8f0'}
+                    onChange={(e) => onChange({ ...settings, borderColor: e.target.value })}
                   />
                 </div>
               </div>

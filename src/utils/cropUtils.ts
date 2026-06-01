@@ -42,13 +42,23 @@ export default async function getCroppedImg(
     return null
   }
 
-  // Set the canvas size to the final cropped size
-  canvas.width = pixelCrop.width
-  canvas.height = pixelCrop.height
+  // Set a maximum dimension to prevent massive canvas operations that cause lag
+  const MAX_DIMENSION = 1500;
+  let scale = 1;
+  if (pixelCrop.width > MAX_DIMENSION || pixelCrop.height > MAX_DIMENSION) {
+    scale = MAX_DIMENSION / Math.max(pixelCrop.width, pixelCrop.height);
+  }
+
+  // Set the canvas size to the scaled cropped size
+  canvas.width = pixelCrop.width * scale;
+  canvas.height = pixelCrop.height * scale;
 
   // Enable high-quality image smoothing
   ctx.imageSmoothingEnabled = true
   ctx.imageSmoothingQuality = 'high'
+
+  // Apply the downscale
+  ctx.scale(scale, scale);
 
   const rotRad = getRadianAngle(rotation)
 
