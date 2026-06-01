@@ -1,0 +1,137 @@
+.custom-cropper-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+}
+
+.image-wrapper {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.image-wrapper img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.crop-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.overlay-mask {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.6);
+  pointer-events: auto;
+}
+
+.overlay-mask.top { top: 0; left: 0; width: 100%; }
+.overlay-mask.bottom { bottom: 0; left: 0; width: 100%; }
+.overlay-mask.left { left: 0; }
+.overlay-mask.right { right: 0; }
+
+.grid-box {
+  position: absolute;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 0 4000px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+}
+
+.grid-line {
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.5);
+  pointer-events: auto;
+  transition: background-color 0.2s;
+}
+
+.grid-line.vertical {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  cursor: col-resize;
+  padding: 0 8px; /* Hit area */
+  background-clip: content-box;
+  margin-left: -8.5px;
+}
+
+.grid-line.horizontal {
+  left: 0;
+  right: 0;
+  height: 1px;
+  cursor: row-resize;
+  padding: 8px 0; /* Hit area */
+  background-clip: content-box;
+  margin-top: -8.5px;
+}
+
+.grid-line:hover {
+  background-color: #2563eb;
+}
+
+.border-handle {
+  position: absolute;
+  background-color: transparent;
+  pointer-events: auto;
+}
+
+.border-handle.top, .border-handle.bottom {
+  left: 10px;
+  right: 10px;
+  height: 16px;
+  cursor: ns-resize;
+}
+.border-handle.top { top: -8px; }
+.border-handle.bottom { bottom: -8px; }
+
+.border-handle.left, .border-handle.right {
+  top: 10px;
+  bottom: 10px;
+  width: 16px;
+  cursor: ew-resize;
+}
+.border-handle.left { left: -8px; }
+.border-handle.right { right: -8px; }
+
+.corner-handle {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  background-color: white;
+  border: 2px solid #2563eb;
+  border-radius: 4px;
+  pointer-events: auto;
+  z-index: 10;
+}
+
+.corner-handle.nw { top: -12px; left: -12px; cursor: nwse-resize; }
+.corner-handle.ne { top: -12px; right: -12px; cursor: nesw-resize; }
+.corner-handle.sw { bottom: -12px; left: -12px; cursor: nesw-resize; }
+.corner-handle.se { bottom: -12px; right: -12px; cursor: nwse-resize; }
+
+.intersection-handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 1px solid #2563eb;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  cursor: move;
+  z-index: 5;
+}
+
+.intersection-handle:hover {
+  background-color: #2563eb;
+  transform: translate(-50%, -50%) scale(1.3);
+}
