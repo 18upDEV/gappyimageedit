@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, ChevronDown, ChevronUp, AlignCenter, RotateCcw } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, ChevronDown, ChevronUp, AlignCenter, RotateCcw, Maximize2, Minimize2, Move } from 'lucide-react';
 import type { OverlaySettings, TextLine } from '../App';
 import './TextEditorPanel.css';
 
@@ -17,6 +17,7 @@ const TextEditorPanel: React.FC<TextEditorPanelProps> = ({
   onChange,
 }) => {
   const [activeSection, setActiveSection] = useState<string>('text');
+  const previewRef = useRef<HTMLDivElement>(null);
 
   const toggleSection = (section: string) => {
     setActiveSection(prev => prev === section ? '' : section);
@@ -59,20 +60,89 @@ const TextEditorPanel: React.FC<TextEditorPanelProps> = ({
     onChange({ ...settings, ...updates });
   };
 
+  const applyPreset = (preset: 'small' | 'medium' | 'large' | 'auto') => {
+    if (preset === 'small') {
+      onChange({ ...settings, boxWidth: 120, boxHeight: 40, padding: 8, borderRadius: 4 });
+    } else if (preset === 'medium') {
+      onChange({ ...settings, boxWidth: 220, boxHeight: 70, padding: 16, borderRadius: 8 });
+    } else if (preset === 'large') {
+      onChange({ ...settings, boxWidth: 350, boxHeight: 120, padding: 24, borderRadius: 12 });
+    } else if (preset === 'auto') {
+      onChange({ ...settings, boxWidth: 0, boxHeight: 0, padding: 16 });
+    }
+  };
+
+  // Live Preview Style
+  const previewOverlayStyle: React.CSSProperties = {
+    backgroundColor: settings.backgroundColor === 'transparent' || settings.backgroundOpacity === 0
+      ? 'transparent' 
+      : `rgba(${parseInt(settings.backgroundColor.slice(1, 3), 16) || 255}, ${parseInt(settings.backgroundColor.slice(3, 5), 16) || 255}, ${parseInt(settings.backgroundColor.slice(5, 7), 16) || 255}, ${settings.backgroundOpacity})`,
+    backdropFilter: settings.template === 'glass' ? 'blur(10px)' : 'none',
+    boxShadow: settings.template === 'clean' ? 'none' : '0 4px 15px rgba(0, 0, 0, 0.1)',
+    border: settings.borderWidth > 0 ? `${settings.borderWidth}px solid ${settings.borderColor}` : 'none',
+    padding: `${settings.padding}px`,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '4px',
+    textAlign: 'center',
+    width: settings.boxWidth > 0 ? `${settings.boxWidth}px` : 'auto',
+    height: settings.boxHeight > 0 ? `${settings.boxHeight}px` : 'auto',
+    justifyContent: 'center',
+    borderRadius: `${settings.borderRadius}px`,
+    fontFamily: settings.fontFamily,
+    transition: 'all 0.2s ease-out',
+    margin: 'auto',
+    position: 'relative',
+    boxSizing: 'border-box',
+    overflow: 'hidden'
+  };
+
   return (
     <div className={`bottom-sheet ${isOpen ? 'open' : ''}`}>
       <div className="sheet-header">
-        <h3>Edit Text</h3>
+        <div className="header-title-group">
+          <h3>Text Editor</h3>
+          <span className="header-subtitle">WYSIWYG Preview</span>
+        </div>
         <button className="sheet-close-btn" onClick={onClose}>
           <X size={24} />
         </button>
       </div>
 
       <div className="sheet-content">
+        {/* LIVE PREVIEW AREA */}
+        <div className="live-preview-container">
+          <div className="preview-canvas">
+            <div style={previewOverlayStyle} ref={previewRef}>
+              {settings.lines.map(line => (
+                <div 
+                  key={line.id}
+                  style={{
+                    fontSize: `${line.fontSize}px`,
+                    fontWeight: line.fontWeight,
+                    fontStyle: line.italic ? 'italic' : 'normal',
+                    color: line.color,
+                    lineHeight: '1.2',
+                    width: '100%',
+                    wordBreak: 'break-word'
+                  }}
+                >
+                  {line.text || '\u00A0'}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="preview-label">Live Preview</div>
+        </div>
+
         {/* Accordion Item: Text Content */}
         <div className={`accordion-item ${activeSection === 'text' ? 'expanded' : ''}`}>
           <div className="accordion-header" onClick={() => toggleSection('text')}>
-            <span>Text</span>
+            <div className="accordion-title">
+               <span className="icon-wrapper"><Move size={16} /></span>
+               <span>Content</span>
+            </div>
             {activeSection === 'text' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
           </div>
           {activeSection === 'text' && (
@@ -83,6 +153,7 @@ const TextEditorPanel: React.FC<TextEditorPanelProps> = ({
                   <input 
                     type="text"
                     className="canva-input"
+                    placeholder={`Enter ${index === 0 ? 'title' : 'subtitle'}...`}
                     value={line.text}
                     onChange={(e) => handleLineChange(line.id, { text: e.target.value })}
                   />
@@ -95,7 +166,10 @@ const TextEditorPanel: React.FC<TextEditorPanelProps> = ({
         {/* Accordion Item: Font & Style */}
         <div className={`accordion-item ${activeSection === 'font' ? 'expanded' : ''}`}>
           <div className="accordion-header" onClick={() => toggleSection('font')}>
-            <span>Font & Style</span>
+             <div className="accordion-title">
+               <span className="icon-wrapper"><AlignCenter size={16} /></span>
+               <span>Typography</span>
+            </div>
             {activeSection === 'font' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
           </div>
           {activeSection === 'font' && (
@@ -133,14 +207,25 @@ const TextEditorPanel: React.FC<TextEditorPanelProps> = ({
                       />
                     </div>
                     <div className="style-col flex-2">
-                      <label>Size</label>
-                      <input 
-                        type="range" 
-                        className="canva-slider"
-                        min="12" max="72" 
-                        value={line.fontSize}
-                        onChange={(e) => handleLineChange(line.id, { fontSize: Number(e.target.value) })}
-                      />
+                      <div className="label-with-value">
+                        <label>Size</label>
+                        <span className="value-badge">{line.fontSize}px</span>
+                      </div>
+                      <div className="input-with-slider">
+                        <input 
+                          type="range" 
+                          className="canva-slider"
+                          min="8" max="120" 
+                          value={line.fontSize}
+                          onChange={(e) => handleLineChange(line.id, { fontSize: Number(e.target.value) })}
+                        />
+                        <input 
+                          type="number" 
+                          className="canva-number-input"
+                          value={line.fontSize}
+                          onChange={(e) => handleLineChange(line.id, { fontSize: Number(e.target.value) })}
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -155,8 +240,10 @@ const TextEditorPanel: React.FC<TextEditorPanelProps> = ({
                         <option value="300">Light</option>
                         <option value="400">Regular</option>
                         <option value="500">Medium</option>
+                        <option value="600">Semi Bold</option>
                         <option value="700">Bold</option>
-                        <option value="800">Black</option>
+                        <option value="800">Extra Bold</option>
+                        <option value="900">Black</option>
                       </select>
                     </div>
                     <div className="style-col">
@@ -178,50 +265,110 @@ const TextEditorPanel: React.FC<TextEditorPanelProps> = ({
         {/* Accordion Item: Box Style */}
         <div className={`accordion-item ${activeSection === 'box' ? 'expanded' : ''}`}>
           <div className="accordion-header" onClick={() => toggleSection('box')}>
-            <span>Box Style</span>
+            <div className="accordion-title">
+               <span className="icon-wrapper"><Maximize2 size={16} /></span>
+               <span>Box & Container</span>
+            </div>
             {activeSection === 'box' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
           </div>
           {activeSection === 'box' && (
             <div className="accordion-body">
-              <div className="compact-input-group">
-                <label>Box Width (px)</label>
-                <input 
-                  type="range" 
-                  className="canva-slider"
-                  min="100" max="600" 
-                  value={settings.boxWidth}
-                  onChange={(e) => onChange({ ...settings, boxWidth: Number(e.target.value) })}
-                />
+              <div className="presets-container">
+                <label className="section-label">Size Presets</label>
+                <div className="preset-grid">
+                  <button className="preset-btn" onClick={() => applyPreset('auto')}>Auto Fit</button>
+                  <button className="preset-btn" onClick={() => applyPreset('small')}>Small</button>
+                  <button className="preset-btn" onClick={() => applyPreset('medium')}>Medium</button>
+                  <button className="preset-btn" onClick={() => applyPreset('large')}>Large</button>
+                </div>
               </div>
+
               <div className="compact-input-group">
-                <label>Box Height (px, 0 = Auto)</label>
-                <input 
-                  type="range" 
-                  className="canva-slider"
-                  min="0" max="600" 
-                  value={settings.boxHeight}
-                  onChange={(e) => onChange({ ...settings, boxHeight: Number(e.target.value) })}
-                />
+                <div className="label-with-value">
+                  <label>Width (0 = Auto)</label>
+                  <span className="value-badge">{settings.boxWidth === 0 ? 'Auto' : settings.boxWidth + 'px'}</span>
+                </div>
+                <div className="input-with-slider">
+                  <input 
+                    type="range" 
+                    className="canva-slider"
+                    min="0" max="800" 
+                    value={settings.boxWidth}
+                    onChange={(e) => onChange({ ...settings, boxWidth: Number(e.target.value) })}
+                  />
+                  <input 
+                    type="number" 
+                    className="canva-number-input"
+                    value={settings.boxWidth}
+                    onChange={(e) => onChange({ ...settings, boxWidth: Number(e.target.value) })}
+                  />
+                </div>
               </div>
+
               <div className="compact-input-group">
-                <label>Padding</label>
-                <input 
-                  type="range" 
-                  className="canva-slider"
-                  min="0" max="100" 
-                  value={settings.padding}
-                  onChange={(e) => onChange({ ...settings, padding: Number(e.target.value) })}
-                />
+                <div className="label-with-value">
+                  <label>Height (0 = Auto)</label>
+                  <span className="value-badge">{settings.boxHeight === 0 ? 'Auto' : settings.boxHeight + 'px'}</span>
+                </div>
+                <div className="input-with-slider">
+                  <input 
+                    type="range" 
+                    className="canva-slider"
+                    min="0" max="800" 
+                    value={settings.boxHeight}
+                    onChange={(e) => onChange({ ...settings, boxHeight: Number(e.target.value) })}
+                  />
+                  <input 
+                    type="number" 
+                    className="canva-number-input"
+                    value={settings.boxHeight}
+                    onChange={(e) => onChange({ ...settings, boxHeight: Number(e.target.value) })}
+                  />
+                </div>
               </div>
+
               <div className="compact-input-group">
-                <label>Corner Radius</label>
-                <input 
-                  type="range" 
-                  className="canva-slider"
-                  min="0" max="50" 
-                  value={settings.borderRadius}
-                  onChange={(e) => onChange({ ...settings, borderRadius: Number(e.target.value) })}
-                />
+                <div className="label-with-value">
+                  <label>Padding</label>
+                  <span className="value-badge">{settings.padding}px</span>
+                </div>
+                <div className="input-with-slider">
+                  <input 
+                    type="range" 
+                    className="canva-slider"
+                    min="0" max="120" 
+                    value={settings.padding}
+                    onChange={(e) => onChange({ ...settings, padding: Number(e.target.value) })}
+                  />
+                  <input 
+                    type="number" 
+                    className="canva-number-input"
+                    value={settings.padding}
+                    onChange={(e) => onChange({ ...settings, padding: Number(e.target.value) })}
+                  />
+                </div>
+              </div>
+
+              <div className="compact-input-group">
+                <div className="label-with-value">
+                  <label>Corner Radius</label>
+                  <span className="value-badge">{settings.borderRadius}px</span>
+                </div>
+                <div className="input-with-slider">
+                  <input 
+                    type="range" 
+                    className="canva-slider"
+                    min="0" max="100" 
+                    value={settings.borderRadius}
+                    onChange={(e) => onChange({ ...settings, borderRadius: Number(e.target.value) })}
+                  />
+                   <input 
+                    type="number" 
+                    className="canva-number-input"
+                    value={settings.borderRadius}
+                    onChange={(e) => onChange({ ...settings, borderRadius: Number(e.target.value) })}
+                  />
+                </div>
               </div>
               
               <div className="style-row" style={{ marginTop: '0.5rem' }}>
@@ -232,12 +379,10 @@ const TextEditorPanel: React.FC<TextEditorPanelProps> = ({
                     value={settings.borderWidth}
                     onChange={(e) => onChange({ ...settings, borderWidth: Number(e.target.value) })}
                   >
-                    <option value="0">0px</option>
-                    <option value="1">1px</option>
-                    <option value="2">2px</option>
-                    <option value="3">3px</option>
-                    <option value="5">5px</option>
-                    <option value="8">8px</option>
+                    <option value="0">None</option>
+                    {[1, 2, 3, 4, 5, 8, 10, 12].map(w => (
+                      <option key={w} value={w}>{w}px</option>
+                    ))}
                   </select>
                 </div>
                 <div className="style-col">
@@ -253,11 +398,14 @@ const TextEditorPanel: React.FC<TextEditorPanelProps> = ({
               
               <div className="style-row" style={{ marginTop: '0.5rem' }}>
                 <div className="style-col flex-1">
-                  <label>Background Opacity</label>
+                  <div className="label-with-value">
+                    <label>Background Opacity</label>
+                    <span className="value-badge">{Math.round(settings.backgroundOpacity * 100)}%</span>
+                  </div>
                   <input 
                     type="range" 
                     className="canva-slider"
-                    min="0" max="1" step="0.1"
+                    min="0" max="1" step="0.01"
                     value={settings.backgroundOpacity}
                     onChange={(e) => onChange({ ...settings, backgroundOpacity: Number(e.target.value) })}
                   />
@@ -272,15 +420,6 @@ const TextEditorPanel: React.FC<TextEditorPanelProps> = ({
                   />
                 </div>
               </div>
-              <div className="compact-input-group">
-                <button 
-                  className="canva-template-btn"
-                  onClick={() => onChange({ ...settings, backgroundOpacity: 0, borderWidth: 0 })}
-                  style={{ textAlign: 'center', marginTop: '0.5rem' }}
-                >
-                  Remove Background & Border
-                </button>
-              </div>
             </div>
           )}
         </div>
@@ -288,7 +427,10 @@ const TextEditorPanel: React.FC<TextEditorPanelProps> = ({
         {/* Accordion Item: Template */}
         <div className={`accordion-item ${activeSection === 'template' ? 'expanded' : ''}`}>
           <div className="accordion-header" onClick={() => toggleSection('template')}>
-            <span>Template</span>
+             <div className="accordion-title">
+               <span className="icon-wrapper"><Minimize2 size={16} /></span>
+               <span>Style Templates</span>
+            </div>
             {activeSection === 'template' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
           </div>
           {activeSection === 'template' && (
@@ -297,19 +439,22 @@ const TextEditorPanel: React.FC<TextEditorPanelProps> = ({
                 className={`canva-template-btn ${settings.template === 'clean' ? 'active' : ''}`}
                 onClick={() => applyTemplate('clean')}
               >
-                Text Only
+                <strong>Text Only</strong>
+                <span>No background or border</span>
               </button>
               <button 
                 className={`canva-template-btn ${settings.template === 'card' ? 'active' : ''}`}
                 onClick={() => applyTemplate('card')}
               >
-                White Label
+                <strong>White Label</strong>
+                <span>Clean solid background</span>
               </button>
               <button 
                 className={`canva-template-btn ${settings.template === 'glass' ? 'active' : ''}`}
                 onClick={() => applyTemplate('glass')}
               >
-                Glass Style
+                <strong>Glass Style</strong>
+                <span>Modern transparent blur</span>
               </button>
             </div>
           )}
@@ -318,21 +463,30 @@ const TextEditorPanel: React.FC<TextEditorPanelProps> = ({
         {/* Accordion Item: Position */}
         <div className={`accordion-item ${activeSection === 'position' ? 'expanded' : ''}`}>
           <div className="accordion-header" onClick={() => toggleSection('position')}>
-            <span>Position</span>
+            <div className="accordion-title">
+               <span className="icon-wrapper"><RotateCcw size={16} /></span>
+               <span>Position & Snapping</span>
+            </div>
             {activeSection === 'position' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
           </div>
           {activeSection === 'position' && (
             <div className="accordion-body">
-              <p className="hint-text">Drag text on the image to move freely, or use snaps:</p>
+              <p className="hint-text">Drag text on the main image to move freely, or use these precise alignments:</p>
               <div className="position-grid">
                 <button className="canva-pos-btn" onClick={() => onChange({ ...settings, x: 50 })}>
-                  <AlignCenter size={18} /> Center X
+                  Center Horizontal
                 </button>
                 <button className="canva-pos-btn" onClick={() => onChange({ ...settings, y: 50 })}>
-                  <AlignCenter size={18} /> Center Y
+                  Center Vertical
                 </button>
-                <button className="canva-pos-btn" onClick={() => onChange({ ...settings, x: 50, y: 50 })}>
-                  <RotateCcw size={18} /> Reset
+                <button className="canva-pos-btn" onClick={() => onChange({ ...settings, x: 10, y: 10 })}>
+                  Top Left
+                </button>
+                <button className="canva-pos-btn" onClick={() => onChange({ ...settings, x: 90, y: 90 })}>
+                  Bottom Right
+                </button>
+                <button className="canva-pos-btn full-width" onClick={() => onChange({ ...settings, x: 50, y: 50 })}>
+                  <RotateCcw size={14} /> Reset to Center
                 </button>
               </div>
             </div>
@@ -344,3 +498,4 @@ const TextEditorPanel: React.FC<TextEditorPanelProps> = ({
 };
 
 export default TextEditorPanel;
+
