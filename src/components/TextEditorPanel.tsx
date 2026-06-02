@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { X, ChevronDown, ChevronUp, AlignCenter, RotateCcw, Maximize2, Minimize2, Move } from 'lucide-react';
 import type { OverlaySettings, TextLine } from '../App';
 import './TextEditorPanel.css';

@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import type { ChangeEvent } from 'react';
 import { domToPng } from 'modern-screenshot';
 import TextEditorPanel from './components/TextEditorPanel';
-import { Type, Download, Trash2, X, Image as ImageIcon } from 'lucide-react';
+import { Type, Download, Trash2, X, Image as ImageIcon, Maximize2 } from 'lucide-react';
 import getCroppedImg from './utils/cropUtils';
 import CustomCropper from './components/CustomCropper';
 import type { GridData } from './components/CustomCropper';
