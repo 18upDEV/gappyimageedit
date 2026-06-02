@@ -389,18 +389,18 @@ function App() {
            <button className="sheet-close-btn" onClick={() => setActiveImageAction(null)}><X /></button>
         </div>
         <div className="sheet-content action-grid">
-           <button className="action-item" onClick={() => { 
+           <button className="action-item primary-action" onClick={() => { 
              setActiveCropIndex(activeImageAction); 
              setActiveImageAction(null);
              setZoom(1); setRotation(0);
            }}>
-             <Maximize2 /> <span>Crop & Edit</span>
+             <Maximize2 size={24} /> <strong>Crop</strong>
            </button>
            <button className="action-item" onClick={() => replaceInputRef.current?.click()}>
-             <ImageIcon /> <span>Replace</span>
+             <ImageIcon size={20} /> <span>Replace</span>
            </button>
            <button className="action-item danger" onClick={() => activeImageAction !== null && deleteImage(activeImageAction)}>
-             <Trash2 /> <span>Remove</span>
+             <Trash2 size={20} /> <span>Remove</span>
            </button>
         </div>
       </div>
